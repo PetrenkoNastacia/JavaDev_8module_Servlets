@@ -17,17 +17,27 @@ public class TimezoneValidateFilter extends HttpFilter {
         String timezone = req.getParameter("timezone");
         if (timezone == null) {
             chain.doFilter(req, res);
-        } else if (isValidTimezone(timezone.replace(' ', '+'))) {
-            chain.doFilter(req, res);
         } else {
-            res.getWriter().write("Error: Invalid timezone");
-            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            res.getWriter().close();
+            try {
+                if (isValidTimezone(timezone.replace(' ', '+'))) {
+                    chain.doFilter(req, res);
+                } else {
+                    res.getWriter().write("Error: Invalid timezone");
+                    res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    res.getWriter().close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private boolean isValidTimezone(String timezone) throws DateTimeException {
-        ZoneId.of(timezone);
-        return true;
+    private boolean isValidTimezone(String timezone) {
+        try {
+            ZoneId.of(timezone);
+            return true;
+        } catch (DateTimeException e) {
+            return false;
+        }
     }
 }
